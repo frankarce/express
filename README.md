@@ -1,4 +1,4 @@
-
+<img width="921" height="590" alt="image" src="https://github.com/user-attachments/assets/f6daf229-4538-4539-a48f-3ee044e08a5f" />
 
 
 
@@ -318,26 +318,31 @@ Para probar que podemos enviar en el body los 3 datos de usuarios que creamos en
 
 
 
-
+```javascript
 export const register = (req, res) => {
     const {email,password,username} = req.body
     console.log(email,password,username)
     res.send('registrando')
 }
 export const login = (req, res) => res.send("logiado");
-
-al hacer el un post con el body modificado con los datos del username, password y email por consola obtendríamos el request de esta forma.
+```
+Al hacer el un post con el body modificado con los datos del username, password y email por consola obtendríamos el request de esta forma.
+<img width="589" height="359" alt="4" src="https://github.com/user-attachments/assets/e717361c-c873-451e-bd78-97abc0602dbf" />
 
  
 Con esta consola
 
- 
+ <img width="589" height="67" alt="5" src="https://github.com/user-attachments/assets/d8dc004f-6e84-4a3a-ada9-15c667d47c47" />
+
 
 
 Una vez confirmado que podemos cachar información procederemos a llamar al modelo de datos para utiliarlo.
-Primero nos vamos al archivo auth.controller e importamos el modelo con 
+Primero nos vamos al archivo `auth.controller` e importamos el modelo con 
+```javascript
 import User from '../models/user.model.js'
-eliminamos el console.log que teníamos y usamos el método créate para crear el usuario con los datos que cachamos de request body
+```
+eliminamos el console.log que teníamos y usamos el método créate para crear el usuario con los datos que cachamos de request body todo esto en `register`.
+```javascript
 export const register = (req, res) => {
     const {email,password,username} = req.body
     User.create({
@@ -349,10 +354,11 @@ export const register = (req, res) => {
     res.send('registrando')
 }
 export const login = (req, res) => res.send("logiado");
+```
 
-
-pero es mas eficiente si los instanciamos a en el backend temporalmente antes de mandarlo a la base de datos por algunas cuestiones de validaciones o modificaciones.
+Pero es mas eficiente si los instanciamos a en el backend temporalmente antes de mandarlo a la base de datos por algunas cuestiones de validaciones o modificaciones.
 Quedaría de esta forma aun sin enviarlo a guardar, aun es temporal.
+```javascript
 import User from '../models/user.model.js'
 export const register = (req, res) => {
     const {email,password,username} = req.body
@@ -366,10 +372,10 @@ export const register = (req, res) => {
 }
 export const login = (req, res) => res.send("logiado");
 
+```
 
-
-si hacemos una peticion con esto la consola nos mandaria el json que genero para mongo 
- para guárdarlo definitivamente como esta operación es asíncrona agregaremos lo que vimos en la conexión de la base dedatos en db.js que seria agregarle el atributo async a la función newUser y en la línea de save agregar un await quedando finalmente de esta forma adiconalmente metiendo un try catch.
+Si hacemos una peticion con esto la consola nos mandaria el json que genero para mongo, para guárdarlo definitivamente como esta operación es asíncrona agregaremos lo que vimos en la conexión de la base de datos en `db.js` que seria agregarle el atributo `async` a la función `newUser` y en la línea de save agregar un `await` quedando finalmente de esta forma adiconalmente metiendo un `try catch`.
+```javascript
 import User from '../models/user.model.js'
 export const register = async (req, res) => {
     const {email,password,username} = req.body
@@ -387,13 +393,16 @@ export const register = async (req, res) => {
    
 }
 export const login = (req, res) => res.send("logiado");
+```
+
+Al hacer el post ahora si se guardaría el dato en la base de datos, para verificarlo podemos hacerlo desde atlas o de algún manejador que tengamos instalado pero esto lo podemos hacer desde `mongodb for vsc`, instalamos la extensión y solo agregamos el localhost de nuestra comunnity mongodb (mongodb://localhost) o puede ser la url de la que tengamos en atlas. En la siguiente imagen veremos la captura que demuestra que ese dato ya esta en mongo.
+
+ <img width="589" height="341" alt="6" src="https://github.com/user-attachments/assets/dbe110af-a624-416b-be5b-da2ad448aec3" />
 
 
-al hacer el post ahora si se guardaría el dato en la base de datos, para verificarlo podemos hacerlo desde atlas o de algún manejador que tengamos instalado pero esto lo podemos hacer desde mongodb for vsc, instalamos la extensión y solo agregamos el localhost de nuestra comunnity mongodb (mongodb://localhost) o puede ser la url de la que tengamos en atlas. En la siguiente imagen veremos la captura que demuestra que ese dato ya esta en mongo.
- 
+Lo siguiente será agregar un timestamp en el modelo de datos(`user.models.js`) justo después del ultimo registro para que nos autorregistre fecha y hora.
 
-Lo siguiente será agregar un timestamp en el modelo de datos justo después del ultimo registro para que nos autorregistre fecha y hora.
-
+```javascript
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -418,10 +427,9 @@ const userSchema = new mongoose.Schema({
     timestamps:true
 })
 export default mongoose.model('User',userSchema)
-
-lo siguiente es notificar al frontend que los datos están correctos para eso vamos a modificar y agregar algunas líneas en el authcontroller
-
-se puede regresar el newUser pero como por el modelo de datos se autocompleta el ID y el timestamp si instanciamos el newUser a la variable userSaved podemos responderle a la petición todos los datos que se guardaron en mongo quedando de la siguiente manera.
+```
+Lo siguiente es notificar al frontend que los datos están correctos para eso vamos a modificar y agregar algunas líneas en el `auth.controller`, se puede regresar el `newUser` pero como por el modelo de datos se autocompleta con el ID y el timestamp si instanciamos el `newUser` a la variable `userSaved` podemos responderle a la petición todos los datos que se guardaron en mongo quedando de la siguiente manera.
+```javascript
 import User from '../models/user.model.js'
 export const register = async (req, res) => {
     const {email,password,username} = req.body
@@ -440,18 +448,21 @@ export const register = async (req, res) => {
    
 }
 export const login = (req, res) => res.send("logiado");
+
+```
 con esta actualización en el response de la petición tendríamos lo siguiente
 
 
+<img width="589" height="485" alt="7" src="https://github.com/user-attachments/assets/387f4c97-d0a9-4f8e-8c19-377e33336f7b" />
 
  
+#
+CREACION DEL TOKEN
+# 
+Vamos a mejorar la contraseña con encriptación. 
 
-Nueva sección TOKEN
- 
-Vamos a mejorar la contraseña con encriptación 
-
-Para lograr esto instalaremos un nuevo modulo llamado bcryptjs desde consola, detendremos temporalmente el servidor para hacer esto, y con npm i bcryptjs se instalara el modulo y lo utilizaremos en auth.controller iniciaremos importándolo
-
+Para lograr esto instalaremos un nuevo modulo llamado `bcryptjs` desde consola, detendremos temporalmente el servidor para hacer esto, y con `npm i bcryptjs` se instalara el modulo y lo utilizaremos en `auth.controller` iniciaremos importándolo:
+```javascript
 import User from '../models/user.models.js';
 import bcrypt from 'bcryptjs';
 export const register = async (req, res) => {
@@ -473,16 +484,17 @@ export const register = async (req, res) => {
     
 };
 export const login = (req, res) => {};
+```
+Lo que sucede aquí es que el password que creo el usuario ahora se almacenara con hash 10, pero al hacer la petición este regresara el hash lo que no es seguro por lo que tenemos que modificar que es lo que vamos a regresar que seria todo menos password.
 
-Lo que sucede aquí es que el password que creo el usuario ahora se almacenara con hash 10
-Pero al hacer la petición este regresara el hash lo que no es seguro por lo que tenemos que modificar que es lo que vamos a regresar que seria todo menos password
-
-Esto nos servirá como credencial del usuario para tener sus datos en los lugares a los que pueda ir o no en la aplicación y para sustituir todos estos datos necesitamos un webtoken que lo puede manejar json, para utilizalo debemos instalarlo como ya lo hemos hecho con anteriormente con npm i jsonwebtoken y hay que importarlo a auth.controller
+Esto nos servirá como credencial del usuario para tener sus datos en los lugares a los que pueda ir o no en la aplicación y para sustituir todos estos datos necesitamos un `webtoken` que lo puede manejar json, para utilizalo debemos instalarlo como ya lo hemos hecho con anteriormente con `npm i jsonwebtoken` y hay que importarlo en `auth.controller`:
+```javascript
 import jwt from 'jsonwbtoken';
-
-ahora vamos a modificar un poco lo que ya tenemos, para empezar después del userSaved
+```
+Ahora vamos a modificar un poco lo que ya tenemos, para empezar después del `userSaved`
 vamos a crear un webtoken con el valor sign lo vamos a relacionar con la sesión del usuario
 por lo pronto tendrá esta estructura.
+```javascript
 jwt.sign({
       id:userSaved._id,
     }, 
@@ -495,9 +507,11 @@ jwt.sign({
       res.json({token});
     }
   );
+```
 Donde el payload sería el id que queremos que se lleve una palabra secreta, funciones adicionales como expiración, y un callback para hacer esta parte asíncrona.
 
-En la siguiente sección crearemos un cookie para enviar la una cookie con el token y mandar un mensaje de respuesta de usuario creado
+En la siguiente sección crearemos un cookie para enviar la una cookie con el token y mandar un mensaje de respuesta de usuario creado:
+```javascript
 const userSaved = await newUser.save();
     jwt.sign({
       id:userSaved._id,
@@ -516,19 +530,18 @@ const userSaved = await newUser.save();
 
     }
   );
-
+```
 Si creamos de nuevo un usuario obtendremos esto en la petición.
 
  
+<img width="589" height="332" alt="8" src="https://github.com/user-attachments/assets/29621262-b00b-46ce-a92c-0f3437548357" />
 
 
-Para poder sacar los datos del token de la cookie 
-
-Por cuestiones de orden se puede manejar los jwt desde su propio apartado, para ello crearemos en la carpeta libs, regresamos a auth.controller y sacamos los 2 res que creamos anteriormente justo debajo del primer paréntesis cerrado con ; que encontremos debajo:
-
+Para poder sacar los datos del token de la cookie, por cuestiones de orden se puede manejar los jwt desde su propio apartado, para ello crearemos en la carpeta libs, regresamos a auth.controller y sacamos los 2 res que creamos anteriormente justo debajo del primer paréntesis cerrado con ; que encontremos debajo:
+```javascript
 (err,token) => {
       if (err) console.log(err);
-      //res.json({token}); inicialmente mandabamos un token
+      //res.json({token}); inicialmente mandabamos un token (Este)
       
 
     }
@@ -538,10 +551,11 @@ Por cuestiones de orden se puede manejar los jwt desde su propio apartado, para 
     message : "Usuario creado...",
   })
 
-    // res.json({
+    // res.json({ (Este)
 
-
-Todo lo que quede del jwt.sign nos lo llevamos a al archivo jwt.js que creamos en libs y le creamos su propia función para poder ejecutarlo las veces que se necesite pero eliminaremos el diccionario de id y lo sustituimos por el argumento que estamos recibiendo de la función “payload”
+```
+Todo lo que quede del `jwt.sign` nos lo llevamos a al archivo `jwt.sign.js` que creamos en libs y le creamos su propia función para poder ejecutarlo las veces que se necesite pero eliminaremos el diccionario de id y lo sustituimos por el argumento que estamos recibiendo de la función “payload”
+```javascript
 function createAccesToken(payload){
 jwt.sign(
 payload, 
@@ -557,15 +571,15 @@ payload,
   }
 );
 }
+```
 
-
-Para quitar el “secret del token podemos hacer lo siguiente, iremos a config.js y crearmos la variable TOKEN_SECRET para manipular la clave
-
+Para quitar el “secret del token podemos hacer lo siguiente, iremos a `config.js` y crearemos la variable TOKEN_SECRET para manipular la clave.
+```javascript
 export const  TOKEN_SECRET = 'crea una clave secreta'
+```
+ de aquí volvemos a `jwt.sign.js` y tenemos que importar la variable que creamos en `config.js` y sustituir el secret por la variable `TOKEN_SECRET`, por cuestiones de validaciones crearemos un `Promise` el cual es un objeto global que tiene node para resolver o rechazar una petición el cual contendrá el código del jwt, nota hay que importar la libreria jsonwebtoken.
 
- de aquí volvemos a jwt.js y tenemos que importar la variable que creamos en config.js y sustituir el secret por la variable TOKEN_SECRET, por cuestiones de validaciones crearemos un Promise el cual es un objeto global que tiene node para resolver o rechazar una petición el cual contendrá el código del jwt, nota hay que importar la lib jsonwebtoken
-
-
+```javascript
 import { TOKEN_SECRET } from "../config";
 import jwt from 'jsonwebtoken';
 export function createAccesToken(payload){
@@ -582,8 +596,10 @@ export function createAccesToken(payload){
     })
 
 }
+```
 
-Dejado el archivo así nos vamos a authcontroller y vamos a importar la función de jwt.js créate AccesToken y lo invocaremos para instanciar el return en la variable token y reactivaremos el response el json que habíamos ignorado anteriormente para notificar al usuario si hay un error y vamos al catch un status 500 quedando el try catch de auth.controller asi :
+Dejado el archivo así nos vamos a authcontroller y vamos a importar la función de `jwt.sign.js` `createAccesToken` y lo invocaremos para instanciar el return en la variable token y reactivaremos el response el json que habíamos ignorado anteriormente para notificar al usuario si hay un error y vamos al catch un status 500 quedando el try catch de `auth.controller` asi :
+```javascript
 import { createAccesToken } from '../libs/jwt.js';
 export const register = async (req, res) => {
     const {email,password,username} = req.body
@@ -608,11 +624,11 @@ try {
   }catch (error){
     res.status(500).json({ message : error.message })
   }
-
-
+```
+#
 Siguiente sección creando la ruta del login 
-
-Para empezar, lo haremos en el authcontroller copiaremos por completo register y borramos la ultima línea que corresponde al login y pegaremos register, esta nos servirá para reutilizar algunas cosas y crear el nuevo login, primero iniciaremos modificándole el nombre a login, lo siguiente es que ya no se necesita el username del req.body asi que solo lo quitamos, dentro del try agregaremos una consulta a mongo para ver si el email existe.
+#
+Para empezar, lo haremos en el `auth.controller` copiaremos por completo register y borramos la ultima línea que corresponde al login y pegaremos register, esta nos servirá para reutilizar algunas cosas y crear el nuevo login, primero iniciaremos modificándole el nombre a login, lo siguiente es que ya no se necesita el username del req.body asi que solo lo quitamos, dentro del try agregaremos una consulta a mongo para ver si el email existe.
 const userFound = await User.findOne({email})  
 y lo manejamos con el siguiente if
 if (!userFound) return res.status(400).json({ message : 'Usuario no encontrado'});  
