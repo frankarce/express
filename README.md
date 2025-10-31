@@ -29,8 +29,9 @@ ELABORADO ENERO- JUNIO DEL 2025
 
 
 
-
-#INTRODUCCION
+#
+ INTRODUCCION
+#
 Express.js es un framework web para Node.js que se utiliza para crear aplicaciones web y APIs. Es el framework web más popular de Node.js. 
 Características de Express.js 
 Es un framework de código abierto y gratuito
@@ -132,18 +133,23 @@ export default app;
 ```
 
 
-#BASE DE DATOS
-Hasta ese punto ya debemos tener instalado mongodb comunnity para continuar.
+#
+BASE DE DATOS
+#
+Hasta ese punto ya debemos tener instalado [mongodb](https://www.mongodb.com/try/download/community?msockid=0eda2884d226647f1e323eccd3c865ca) comunnity para continuar.
 
 Si ya esta necesitamos el paquete mongoose para poder conectarnos con mongodb, lo instalamos con la siguiente instrucción.
 
-Npm i mongoose
+`Npm i mongoose`
 
-Una vez instalado procederemos a instanciar el driver de mongo en el archivo db.js en el cual manejaremos todo lo referente a la base de datos.
+Una vez instalado procederemos a instanciar el driver de mongo en el archivo `db.js` en el cual manejaremos todo lo referente a la base de datos.
 Lo primero que hay que hacer es importar mongoose.
+```javascript
 import mongoose from "mongoose";
+```
 
-y para poder realizar la conexión crearemos una función llamada connectDB que será asíncrona la sintaxis es la siguiente
+Y para poder realizar la conexión crearemos una función llamada connectDB que será asíncrona la sintaxis es la siguiente:
+```javascript
 export const connectDB = async () => {
     try {
         await mongoose.connect('mongodb://localhost/merndb')
@@ -154,19 +160,19 @@ export const connectDB = async () => {
     
 
 };
-
+```
 Esta función incluye un try catch para verificar que la conexión sea exitosa, la línea del await contiene la cadena de conexión a la base de datos que queramos.
 Se le agrega un consolelog nomas para notificar en la consola que, si se realizó la conexión, hasta aquí ya está la preparación de la base de datos.
-Lo siguiente es consumir la base de datos y para ello iremos al archivo index.js
+Lo siguiente es consumir la base de datos y para ello iremos al archivo `index.js`
 Donde importaremos e invocaremos la función connectDB
-
+```javascript
 import app from './app.js'
 import { connectDB } from './db.js'
 
 connectDB();
 app.listen(3000)
 console.log('Server on port', 3000);
-
+```
 al guardar en el console log podemos ver si se conectó o no la base de datos.
 
 [nodemon] restarting due to changes...
