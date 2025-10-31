@@ -1,4 +1,4 @@
-<img width="921" height="590" alt="image" src="https://github.com/user-attachments/assets/f6daf229-4538-4539-a48f-3ee044e08a5f" />
+<img width="589" height="214" alt="image" src="https://github.com/user-attachments/assets/fc4bc286-775c-496a-8e2a-3a1d01c87c92" /><img width="921" height="242" alt="image" src="https://github.com/user-attachments/assets/3f44407d-5833-49ea-9438-f1bfcb33e17f" /><img width="921" height="590" alt="image" src="https://github.com/user-attachments/assets/f6daf229-4538-4539-a48f-3ee044e08a5f" />
 
 
 
@@ -628,25 +628,32 @@ try {
 #
 Siguiente sección creando la ruta del login 
 #
-Para empezar, lo haremos en el `auth.controller` copiaremos por completo register y borramos la ultima línea que corresponde al login y pegaremos register, esta nos servirá para reutilizar algunas cosas y crear el nuevo login, primero iniciaremos modificándole el nombre a login, lo siguiente es que ya no se necesita el username del req.body asi que solo lo quitamos, dentro del try agregaremos una consulta a mongo para ver si el email existe.
-const userFound = await User.findOne({email})  
+Para empezar, lo haremos en el `auth.controller` copiaremos por completo register y borramos la ultima línea que corresponde al `login` y pegaremos `register`, esta nos servirá para reutilizar algunas cosas y crear el nuevo `login`, primero iniciaremos modificándole el nombre a login, lo siguiente es que ya no se necesita el `username` del `req.body` asi que solo lo quitamos, dentro del `try` agregaremos una consulta a mongo para ver si el email existe.
+
+```javascript
+const userFound = await User.findOne({email})
+```
 y lo manejamos con el siguiente if
+```javascript
 if (!userFound) return res.status(400).json({ message : 'Usuario no encontrado'});  
-  
-si lo encuentra ahora verifica si las credenciales son correctas 
+  ```
+si lo encuentra ahora verifica si las credenciales son correctas
+```javascript
 const isMatch = await bcrypt.compare(password,userFound.password);
   if (!isMatch) return res.status(400).json({message : 'Password o usuario incorrectos'})
+```
+por ultimo asi como en el token del register tendremos que modificar todas las varibles de `userSaved` por `userFound` 
 
-por ultimo asi como en el token del register tendremos que modificar todas las varibles de userSaved por userFound 
-
-solo quedaría crear el controlador para logout
+Solo quedaría crear el controlador para logout
+```javascript
 export const logout = (req,res) => {
   res.cookie('token',"",{expires:new Date(0)})
   return res.sendStatus(200)
 }
-
+```
 
 Y se agrega al auth.routes.js
+```javascript
 import { Router } from "express";
 import {login, register, logout} from '../controllers/auth.controller.js'
 const router = Router();
@@ -656,7 +663,10 @@ router.post('/login', login);
 router.post('/logout', logout);
 
 export default router
-el auth.controller quedaría asi por completo
+```
+
+El auth.controller quedaría asi por completo
+```javascript
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import { createAccesToken } from '../libs/jwt.js';
@@ -720,27 +730,30 @@ export const logout = (req,res) => {
   res.cookie('token',"",{expires:new Date(0)})
   return res.sendStatus(200)
 }
-
+```
 
 Solo queda que vayas a hacer post de login para verificar que si está borrando el token logout y que si se mantiene el token si haces login en thunder client.
 
-
+#
 Validación de Token y rutas protegidas
+#
 Crear una función que verifique que el usuario está conectado
 
-Para eso necesitamos iniciar creando una ruta a la que llamaremos profile en auth.routes.js
+Para eso necesitamos iniciar creando una ruta a la que llamaremos `profile` en `auth.routes.js`
+```javascript
 router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', logout);
 router.get('/profile');
-esto dejara listo el archivo para trabajar en el, ahora debemos ir a auth.controller para crear la función que va a interactuar con esta ruta.
-
+```
+esto dejara listo el archivo para trabajar en el, ahora debemos ir a `auth.controller` para crear la función que va a interactuar con esta ruta.
+```javascript
 export const profile = (req,res) => {
 res.send("profile");
+```
 
-
-y regresamos a routes para importarlo.
-
+y regresamos a `routes` para importarlo.
+```javascript
 import { Router } from "express";
 import {
     login, 
@@ -748,47 +761,60 @@ import {
     logout, 
     profile,
 } 
-
+```
 Si hacemos un get con tunder client a profile con el body de correo y password nos debe responder “Profile”
- 
+
+ <img width="589" height="383" alt="9" src="https://github.com/user-attachments/assets/460d7718-61b0-495c-bab9-23e122cb8af4" />
+
 El objetivo de esto es en lugar de mostrar profile es traer los datos del usuario “logueado”
-Por lo tanto necesitamos una función que verifique que el usuario tenga ese estatus por lo pronto iremos a middlewares y crearemos un archivo llamado validateTokens.js
+Por lo tanto necesitamos una función que verifique que el usuario tenga ese estatus por lo pronto iremos a la carpeta `middlewares` y crearemos un archivo llamado `validateTokens.js`
 Con el siguiente contenido :
+```javascript
 export const authRequired = (req,res,next) =>{
     console.log('validar token');
     next()
 ;}  
+```
 
 Los middlewares son funciones que se ejecutan antes de cargar una ruta.
 Se ponen antes de la llamada a la ruta como en este ejemplo:
+```javascript
 router.get('/profile',authRequired,profile);
-esto ejecuta la función “authRequired” antes de hacer la petición a profile.
+```
+Esto ejecuta la función “authRequired” antes de hacer la petición a profile.
 Si ahora hacemos un get de profile en consola debe contestarnos “Validar token” como vemos hasta debajo de la siguiente captura.
- 
+ <img width="589" height="554" alt="10" src="https://github.com/user-attachments/assets/5e706a37-b30d-4d9e-b0ca-d21fdf95600d" />
+
 Ya lista la función ahora vamos a sacar los datos del token.
-Lo primero que podemos verificar es si en el header viene el token y lo podemos comprobar haciendo la petición y el lugar de mandar a consola “validar token” pondremos req.headers esto hará que por consola veamos todo lo que viene. 
+Lo primero que podemos verificar es si en el header viene el token y lo podemos comprobar haciendo la petición y el lugar de mandar a consola “validar token” pondremos `req.headers` esto hará que por consola veamos todo lo que viene. 
  
+<img width="589" height="153" alt="11" src="https://github.com/user-attachments/assets/d83464b4-4a8e-4e5d-b97f-a211899da2b4" />
 
 Si se fijan primero sale el json y una vez que pasa por ahí continua al get de profile, lo que significa que si está entrando a authRequired.
 Lo siguiente que haremos será cachear el token en una variable modificamos así el authRequired:
-
+```javascript
 export const authRequired = (req,res,next) =>{
     const token = req.headers.cookie
     console.log(token);
     next();
-;}  
+;}
+```
  Y esto ya nos regresa el token.
 El problema de hacer esto es que la extracción de datos es un poco complicado porque saldrá la cadena completa pero para evitar esto traeremos directo la cookie.
+```javascript
 export const authRequired = (req, res, next) => {
     const cookie = req.cookies;
     console.log(cookie);
     next();
 };
-
-Si hacemos un get a profile obtendremos un undefined por que node no puede leerlas, por lo tanto instalaremos un traductor 
-npm i cookie-parser  
+```
+Si hacemos un get a profile obtendremos un undefined por que node no puede leerlas, por lo tanto instalaremos un traductor:
+```
+npm i cookie-parser
+```
 (pueden hacerlo en otra terminal o bajar el server temporalmente para instalarlo)
-después para eso iremos a app.js donde importamos cookie parser y lo usamos.
+Después para eso iremos a `app.js` donde importamos cookie parser y lo usamos.
+```javascript
 import express from 'express'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
@@ -801,7 +827,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api",authRoutes);
 export default app;
-
+```
 esto nos reportara el token con segmentaciones de puntos.
 {
   token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MGVlMmFmMTQyODQ2OGU5ZWQ0MDA1YiIsImlhdCI6MTc0NTgxMDAxNSwiZXhwIjoxNzQ1ODk2NDE1fQ.d0gTjLtfcqmbwoYwyrtBbNDeaukaJ7JyXavq2AgMt_Q'
@@ -809,8 +835,8 @@ esto nos reportara el token con segmentaciones de puntos.
 
 Aun si necesitamos validar que si exista el token en el contexto o en otras palabras logeado.
 
-Volvemos a validateToke.js. primero debemos verificar si hay token de esta manera.
-
+Volvemos a `validateTokens.js` primero debemos verificar si hay token de esta manera.
+```javascript
 export const authRequired = (req,res,next) =>{
     const {token} = req.cookies;
     
@@ -819,10 +845,10 @@ export const authRequired = (req,res,next) =>{
     
     next();
 ;}  
-
+```
 Después en caso de existir un token debemos verificar que sea generado por nosotros.
-Para eso importamos jwt y usamos la propiedad de verify y nos traempos el TOKEN_SECRET que creamos en config.js
-
+Para eso importamos `jwt` y usamos la propiedad de `verify` y nos traempos el `TOKEN_SECRET` que creamos en `config.js`
+```javascript
 import jwt from 'jsonwebtoken'
 import { TOKEN_SECRET } from '../config.js';
 export const authRequired = (req,res,next) =>{
@@ -840,9 +866,10 @@ export const authRequired = (req,res,next) =>{
 
     
 ;}  
-
-De aquí nos mudamos a authcontroller para los pasos finales de la verificación.
-En la función de profile ya no ocupamos el console log ni el res.send lo primero que haremos es hacer una consulta  para ver si existe el usuario que hizo la petición, si no lo encuentra mandamos el error 400 y le decimos “usuario no encontrado”, en caso contrario le regresamos los datos.
+```
+De aquí nos mudamos a `auth.controller` para los pasos finales de la verificación.
+En la función de profile ya no ocupamos el `console.log` ni el `res.send` lo primero que haremos es hacer una consulta  para ver si existe el usuario que hizo la petición, si no lo encuentra mandamos el error 400 y le decimos “usuario no encontrado”, en caso contrario le regresamos los datos.
+```javascript
 export const profile = async (req,res) => {
   const userFound = await User.findById(req.user.id)
   if (!userFound ) return res.status(400).json({ message : "Usuario no encontrado"});
@@ -857,13 +884,17 @@ export const profile = async (req,res) => {
   //console.log(req.user);
   //res.send("profile");
 }
+```
 Con esto ya deberíamos tener una respuesta de profile de la siguiente manera.
  
+<img width="589" height="533" alt="12" src="https://github.com/user-attachments/assets/da956408-5637-47af-bb31-203783163151" />
 
-Siguiente Punto
+#
 TAREA CRUD.
+#
 Después de terminar con la autenticación lo siguiente es trabajar con las tareas del crud. Por lo tanto ahora vamos a crear un archivo de rutas para las tareas lo llamaremos tasks.routes.js.
 
+```javascript
 import { Router } from "express";
 import { authRequired } from "../middlewares/validateTokens.js";
 import { getTasks, getTask, createTask, deleteTask, updateTask } from "../controllers/task.controller.js";
@@ -877,10 +908,10 @@ router.delete('/tasks/:id',authRequired,deleteTask)
 router.put('/tasks/:id',authRequired,updateTask)
 
 export default router
-
+```
 
 tiene el mismo formato que auth.routes lo que cambiara serán las rutas solicitadas. Después de configurarlo vamos a app.js para registrarlo.
-
+```javascript
 import express from 'express';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
@@ -894,8 +925,9 @@ app.use("/api",authRoutes);
 app.use("/api",taskroutes);
 
 export default app;
-
-una vez hecho el regiso de las rutas de task necesitamos los controles para las tasks nos vamos a la carpeta controllers y crearemos el archivo task controller para poner cada una de las tareas que ya registramos en rutas y quedaría asi.
+```
+una vez hecho el registro de las rutas de task necesitamos los controles para las tasks nos vamos a la carpeta controllers y crearemos el archivo task controller para poner cada una de las tareas que ya registramos en rutas y quedaría asi.
+```javascript
 import Task from "../models/task.model.js";
 
 export const getTasks = async (req, res) =>{ 
@@ -928,11 +960,12 @@ export const deleteTask = async (req, res) => {
    if (!task) return res.status(404).json({ message: 'Tarea no encontrada' });
    res.json({ message: 'Tarea eliminada correctamente' });
 }
+```
 
 
+Como tal tenemos que interactuar con mongodb para poder realizar los movimientos de este crud y por lo tanto necesitarmos un modelo especifico para este modulo, nos iremos a la carpeta `models` y crearemos el archivo `task.model.js` y lo llenarmos con el siguiente esquema.
 
-Como tal tenemos que interactuar con mongodb para poder realizar los movimientos de este crud y por lo tanto necesitarmos un modelo especifico para este modulo, nos iremos a la carpeta models y crearemos el archivo task.model.js y lo llenarmos con el siguiente esquema.
-
+```javascript
 import mongoose  from "mongoose";
 const taskSchema = new mongoose.Schema({
 
@@ -943,17 +976,21 @@ const taskSchema = new mongoose.Schema({
 )
 
 export default mongoose.model('Task', taskSchema);
-
+```
 
 para poder ver si funciona debemos ir al thunderclient tener un token valido disponible (un usuario logueado) y mandarle una petición a post a task  http://localhost:3000/api/task con este body 
 
-
+```json
 { "title":"mi primer tarea",
   "description": "mi primer tarea desde 0"}
+```
  Y nos responderá: 
  
+ <img width="589" height="223" alt="13" src="https://github.com/user-attachments/assets/38a00edc-331f-410d-a7cf-3ba902d9ed24" />
 
-Aquí falta un detalle, la tarea se guardo pero en la base de datos no se registra que usuario la creo por lo tanto hay que agregar ese campo en task.models y quedaría de esta forma el user justo debajo de date:
+
+Aquí falta un detalle, la tarea se guardo pero en la base de datos no se registra que usuario la creo por lo tanto hay que agregar ese campo en `task.models` y quedaría de esta forma el `user` justo debajo de date:
+```javascript
 import mongoose  from "mongoose";
 const taskSchema = new mongoose.Schema({
 
@@ -965,18 +1002,20 @@ const taskSchema = new mongoose.Schema({
 )
 
 export default mongoose.model('Task', taskSchema);
-solo que lleva argumentos adicionales mongoose.Schema.Types.ObjectId esto saca el user id del usario y el ref hace una referencia al modelo user.
+```
+solo que lleva argumentos adicionales `mongoose.Schema.Types.ObjectId` esto saca el user id del usario y el ref hace una referencia al modelo user.
 
 Si intentamos hacer de nuevo una petición a tasks la que ya nos había respondido con los datos de creación de la tarea ahora nos mandara un error por que falta agregar el path del usuario saldría esto:
-
+```
 ValidationError: Task validation failed: user: Path `user` is required.
     at Document.invalidate (C:\Users\franc\express\express\node_modules\mongoose\lib\document.js:3362:32)
     at C:\Users\franc\express\express\node_modules\mongoose\lib\document.js:3123:17
     at C:\Users\franc\express\express\node_modules\mongoose\lib\schemaType.js:1417:9
     at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+```
+para solucionar este error nos vamos al `task.controller` especificmente al control createTask
 
-para solucionar este error nos vamos al task.controller especificmente al control createTask
-
+```javascript
 export const createTask = async (req, res) => {
     console.log(req.user);
     const { title, description, date } = req.body;
@@ -984,59 +1023,71 @@ export const createTask = async (req, res) => {
     const savedTask =  await newTask.save();
     res.json(savedTask);
 }
+```
+Y crea una tarea con 2 usuarios para iniciar un problema de permisos.
+Lo siguiente es manejar las tareas que ya existen para eso solo cambiamos el método de la petición a get siempre y cuando tengamos un `login` activo, si hacemos la petición tal como la tenemos nos mostrara todas las tareas que hay y eso no esta bien por que se supone que el usuario solo debe de ver sus tareas no las de los demás. Lo que se muestra a continuación es el get que me trae las tareas de 2 usuarios.
+ 
+ <img width="589" height="277" alt="14" src="https://github.com/user-attachments/assets/ce8c0deb-f568-4e13-a0c7-8d4d825fa52f" />
 
-Lo siguiente es manejar las tareas que ya existen para eso solo cambiamos el método de la petición a get siempre y cuando tengamos un login activo, si hacemos la petición tal como la tenemos nos mostrara todas las tareas que hay y eso no esta bien por que se supone que el usuario solo debe de ver sus tareas no las de los demás. Lo que se muestra a continuación es el get que me trae las tareas de 2 usuarios.
- 
- 
 Para arreglar este problema volvemos a el control de getTasks y vamos a modificar la consulta
-
+```javascript
 export const getTasks = async (req, res) =>{ 
     const tasks = await Task.find(
         { user: req.user.id }
     );
     res.json(tasks);
 }
-
+```
 
  Ya con esto nos debe regresar solo la tarea de ese usuario pueden mandar al console log el user.id para corroborar que si es ese.
  
+<img width="589" height="177" alt="15" src="https://github.com/user-attachments/assets/fd558061-fb28-4820-8947-13f977375763" />
 
 Pero si adicionalmente queremos datos del usuario podemos agregarle a la consulta la propiedad populate para que agregue todo el diccionario de los datos del usuario.
-
+```javascript
 export const getTasks = async (req, res) =>{ 
     const tasks = await Task.find(
         { user: req.user.id }
     ).populate('user','name email');
     res.json(tasks);
 }
-
+```
  Si dejan solo user les treaera todo hasta el password pero si solo quieren campos es especifico se pueden poner después de una coma.
  Este es con todo 
- 
+ <img width="589" height="258" alt="16" src="https://github.com/user-attachments/assets/6bb9a8be-543a-4e97-b088-1b8abea884ad" />
+
 
 Este es con el name y el email 
- 
+ <img width="589" height="262" alt="17" src="https://github.com/user-attachments/assets/cfecfc26-4dd7-45e1-9aa2-2c8b820e6204" />
+
 
 Ahora nos pasamos a pedir uan tarea especifica y en este caso iremos directo a thunderclient 
 
 Y haremos un get de una tarea especifica con su id para estos hacemos un get tasks para ver cuales hay y copiar su id
 
 Y de ahí en el get le vamos a agregar ese id como parámetro solo separándolo de la url original con una /:
- 
+
+ <img width="589" height="214" alt="image" src="https://github.com/user-attachments/assets/43096157-71e5-4cbe-ac26-9d388ef38238" />
+
 
 Ahora si cambiamos el método a delete necesita un id para eliminar como en el task de una tarea y en para actualizar también tenemos que mandarle el id pero en body los campos con los datos a actualizar y listo hasta aquí ya tenemos el crud como api, solo nos falta crear el frontend para deslindarnos de thunderclient.
 
 
 Solo nos falta unas validaciones para los datos de entrada.
 
+#
 Siguiente sección Validar los datos de entrada 
+#
 
-Para poder realizar estas validaciónes necesitamos crear esquemas de validación lo primer que hay que hacer si aun no lo hemos hecho es crear la carpeta schemas en src y reutilizaremos librerías de validación de datos. Existen muchas pero en este caso usaremos zod para instalarla usamos el 
-npm i zod 
+Para poder realizar estas validaciónes necesitamos crear esquemas de validación lo primer que hay que hacer si aun no lo hemos hecho es crear la carpeta `schemas` en `src` y reutilizaremos librerías de validación de datos. Existen muchas pero en este caso usaremos zod para instalarla usamos el 
+```
+npm i zod
+```
 
-y nos teleportamos a la carpeta schemas a crear el archivo que validara los datos de autenticación, le vamos a poner auth.schema.js
+y nos teleportamos a la carpeta schemas a crear el archivo que validara los datos de autenticación, le vamos a poner `auth.schema.js`
 
 Dentro vamos a importar zod como {z} por lo pronto solo agregaremos esquema para register y login que son los que ocupan ingresar datos.
+```javascript
 import {z} from 'zod';
 
 export const registerSchema = z.object({
@@ -1049,9 +1100,10 @@ export const loginSchema = z.object({
     email: z.string({required_error: 'El email es obligatorio'}).email('El email no es válido'),
     password: z.string({required_error: 'La contraseña es obligatoria'})
 });
-
+```
 Ahora recordemos que estos archivos necesitan ser insertados en algún lugar ara establecerse como compuertas. Por lo tanto debemos crear un middleware como el que creamos antes donde se generaba el token de acceso. 
 
+```javascript
 export const validateSchema = (schema) => (req, res, next) => {
    
     try {
@@ -1072,9 +1124,9 @@ export const validateSchema = (schema) => (req, res, next) => {
         return res.status(400).json(errorMessages);
     }
 }
-
-Y por ultimo para que pueda estar como compuerta debemos ir a auth.routes para anteponerlo como lo hicimos con el authRequired
-
+```
+Y por ultimo para que pueda estar como compuerta debemos ir a `auth.routes` para anteponerlo como lo hicimos con el `authRequired`
+```javascript
 import { Router } from "express";
 
 import { login, register, logout, profile } from "../controllers/auth.controller.js"; 
@@ -1088,11 +1140,12 @@ router.post('/register', validateSchema(registerSchema), register);
 router.post('/logout', logout);
 router.get('/profile', authRequired, profile);
 export default router;
-
+```
 
 y ahora si podemos hacer peticiones a login o register cumpliendo o no con las reglas que establecimos para obtener errores. Pero nos regresa un diccionario con varias cosas y esto se debe pulir pero ya esta corregido en el .
  
- 
+ <img width="589" height="365" alt="19" src="https://github.com/user-attachments/assets/34d0b6ef-afac-4fb4-b017-123e63eff7ca" />
+
 
 Para mostrar solo lo que queremos mostrar en el fron end 
 
