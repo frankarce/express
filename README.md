@@ -1,6 +1,3 @@
-<img width="589" height="214" alt="image" src="https://github.com/user-attachments/assets/fc4bc286-775c-496a-8e2a-3a1d01c87c92" /><img width="921" height="242" alt="image" src="https://github.com/user-attachments/assets/3f44407d-5833-49ea-9438-f1bfcb33e17f" /><img width="921" height="590" alt="image" src="https://github.com/user-attachments/assets/f6daf229-4538-4539-a48f-3ee044e08a5f" />
-
-
 
 
 INSTITUTO TECNOLÓGICO SUPERIOR DE GUASAVE
