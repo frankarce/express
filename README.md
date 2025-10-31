@@ -149,7 +149,7 @@ Y para poder realizar la conexión crearemos una función llamada connectDB que 
 ```javascript
 export const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb://localhost/merndb')
+        await mongoose.connect('mongodb://localhost/mydatabase')
         console.log(">>> DB conectada");
     } catch (error){
         console.log(error);
