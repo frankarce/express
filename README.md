@@ -222,8 +222,8 @@ export default router
 después iremos a la carpeta controllers y generaremos el archivo `auth.controller.js`
 que tendrá funciones para procesar peticiones:
 ```javascript
-export const register = (req, res) => {};
-export const login = (req, res) => {};
+export const register = (req, res) => res.send("registra");
+export const login = (req, res) => res.send("logiado");
 ```
 De aquí volvemos al archivo que creamos en routes para actualizarlo relacionándolo con las peticiones de register y login:
 ```javascript
@@ -235,43 +235,69 @@ router.post('/register', register)
 router.post('/login', login)
 export default router
 ```
-de aquí nos vamos al archivo app.js	y le agregamos las siguientes líneas para usar authRouthes que serian la línea 3 y la línea 6
+de aquí nos vamos al archivo `app.js`	y le agregamos las siguientes líneas para usar authRouthes que serian la línea 3 y la línea 6
 ```javascript
-1.	import express from 'express'
-2.	import morgan from 'morgan'
-3.	import authRoutes from "./routes/auth.routes.js"
+import express from 'express'
+	import morgan from 'morgan'
+	import authRoutes from "./routes/auth.routes.js"
 
-4.	const app = express();
+	const app = express();
 
-5.	app.use(morgan('dev'));
-6.	app.use(authRoutes)
-7.	export default app;
+	app.use(morgan('dev'));
+	app.use(authRoutes)
+	export default app;
 ```
 Para poder hacer una petición de prueba instalaremos la extensión Thunder Client para hacerle pruebas.
- 
-Por motivos de formato u organización de ulrs se agrega para la petición de registro el subfijo api se puede hacer en routes en el archivo que se quiere hacer el cambio en el router post por esta línea: 
+ <img width="588" height="314" alt="peticionlogin" src="https://github.com/user-attachments/assets/8993437d-5b93-482f-b5ba-4835957c67ea" />
+Por motivos de formato u organización de ulrs se agrega par
+a la petición de registro el subfijo api se puede hacer en routes en el archivo que se quiere hacer el cambio en el router post por esta línea: 
+```javascript
+import { Router } from "express";
+import {login, register} from '../controllers/auth.controller.js'
+const router = Router()
 router.post('/api/register', register)
 router.post('/api/login', login)
-o bien se puede hacer en el archivo app.js en la línea de app.use de authRoutes:
+export default router
+```
+o bien se puede hacer en el archivo `app.js` en la línea de app.use de authRoutes:
+```javascript
 app.use(morgan('dev'));
 app.use("/api",authRoutes)
 export default app;
-con esto las peticiones a localhost:3000/register o localhost:3000/login ya no funcionaran
-ahora tendríamos que hacer la petición asi localhost:3000/api/register
+```
+Con esto las peticiones a :
+```Console 
+localhost:3000/register
+```
+o 
+```Console 
+localhost:3000/login
+```
+Ya no funcionaran
+ahora tendríamos que hacer la petición asi: 
+```Console 
+localhost:3000/api/register
+```
 Para evitar redundancia se optara por el método de app.js.
 
-Una vez hecho esto iremos al archivo auth.controller.js a especificar que en register en vez de contestar con “registra” un post ahora va recibir dato lo primero es actualizar estas líneas
+Una vez hecho esto iremos al archivo `auth.controller.js` a especificar que en register en vez de contestar con “registra” un post ahora va recibir dato lo primero es actualizar estas líneas
+```javascript
 export const register = (req, res) => res.send("registra");
 export const login = (req, res) => res.send("logiado");
-
+```
 por esto 
+```javascript
 export const register = (req, res) => {
     console.log(req.body);
     res.send('registrando')
 }
-Donde en el console.log mostraremos el body del request que es un json y la respuesta del request seria res.send(‘registrando’) lo siguiente seria hacer un post para ver que responde en la consola pero habría que enviarle un dato por thunder client ese dato es un json que lo pondremos en la sección body como se puede apreciar en la imagen de abajo.
+```
+Donde en el `console.log` mostraremos el body del request que es un json y la respuesta del request seria ```res.send(‘registrando’)``` lo siguiente seria hacer un post para ver que responde en la consola pero habría que enviarle un dato por thunder client ese dato es un json que lo pondremos en la sección body como se puede apreciar en la imagen de abajo.
+<img width="589" height="292" alt="2" src="https://github.com/user-attachments/assets/a73ac2cf-401d-473a-86a9-3a2d167ade12" />
 
- al ejecutarlo en la consola obtenemos un “undefined” porque actualmente nodejs no es capaz de leer un json nativamente, tenemos que agregar una app en el archivo app.js que habilite la lectura de jsons entonces nos movemos a app.js y debajo de Morgan agregamos 
+
+Al ejecutarlo en la consola obtenemos un “undefined” porque actualmente nodejs no es capaz de leer un json nativamente, tenemos que agregar una app en el archivo app.js que habilite la lectura de jsons entonces nos movemos a app.js y debajo de Morgan agregamos:
+```javascript
 import express from 'express'
 import morgan from 'morgan'
 import authRoutes from "./routes/auth.routes.js"
@@ -282,8 +308,12 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use("/api",authRoutes);
 export default app;
- volvemos a mandar el post y ahora si en el consolé saldrá el json que mandamos.
- 
+```
+Volvemos a mandar el post y ahora si en el consolé saldrá el json que mandamos.
+
+
+ <img width="452" height="73" alt="3" src="https://github.com/user-attachments/assets/1c7f7ed8-76a6-4485-b8a3-ba6a756c0b19" />
+
 Para probar que podemos enviar en el body los 3 datos de usuarios que creamos en el modelo de datos de la carpeta models que son email usuario y password modificaremos el archivo que con la línea 2 cache los datos que vienen de la petición y los muestre por consola quedaría asi el archivo auth
 
 
