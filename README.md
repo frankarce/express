@@ -174,13 +174,16 @@ app.listen(3000)
 console.log('Server on port', 3000);
 ```
 al guardar en el console log podemos ver si se conectó o no la base de datos.
-
+```console
 [nodemon] restarting due to changes...
 [nodemon] starting `node src/index.js`
 Server on port 3000
 >>> DB conectada
+```
 
-Lo siguiente es crear un archivo en models llamado user.models.js, dentro importaremos mongoose para utilizar su esquema con datos para almacenar con algunos atributos.
+Lo siguiente es crear un archivo en models llamado `user.models.js`, dentro importaremos mongoose para utilizar su esquema con datos para almacenar con algunos atributos.
+
+```javascript
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -203,10 +206,11 @@ const userSchema = new mongoose.Schema({
 
 })
 export default mongoose.model('User','userSchema')
-
+```
 la función me dice que datos voy a manipular y el export me da la interacción con la base de datos desde otras ubicaciones.
 
-Lo siguiente es configurar el archivo de rutas para los componentes del sitio con 2 rutas una de registro y la del login:
+Lo siguiente es configurar el archivo de rutas(`src/routes/auth.routes.js`) para los componentes del sitio con 2 rutas una de registro y la del login:
+```javascript
 import { Router } from "express";
 
 const router = Router()
@@ -214,15 +218,15 @@ const router = Router()
 router.post('/register')
 router.post('/login')
 export default router
-
-después iremos a la carpeta controllers y generaremos el archivo auth.controller.js
-que tendrá funciones para procesar peticiones
+```
+después iremos a la carpeta controllers y generaremos el archivo `auth.controller.js`
+que tendrá funciones para procesar peticiones:
+```javascript
 export const register = (req, res) => {};
 export const login = (req, res) => {};
-
-
-
-de aquí volvemos al archivo que creamos en routes para actualizarlo relacionándolo con las peticiones de register y login 
+```
+De aquí volvemos al archivo que creamos en routes para actualizarlo relacionándolo con las peticiones de register y login:
+```javascript
 import { Router } from "express";
 import {login, register} from '../controllers/auth.controller.js'
 const router = Router()
@@ -230,8 +234,9 @@ const router = Router()
 router.post('/register', register)
 router.post('/login', login)
 export default router
-
+```
 de aquí nos vamos al archivo app.js	y le agregamos las siguientes líneas para usar authRouthes que serian la línea 3 y la línea 6
+```javascript
 1.	import express from 'express'
 2.	import morgan from 'morgan'
 3.	import authRoutes from "./routes/auth.routes.js"
@@ -241,6 +246,7 @@ de aquí nos vamos al archivo app.js	y le agregamos las siguientes líneas para 
 5.	app.use(morgan('dev'));
 6.	app.use(authRoutes)
 7.	export default app;
+```
 Para poder hacer una petición de prueba instalaremos la extensión Thunder Client para hacerle pruebas.
  
 Por motivos de formato u organización de ulrs se agrega para la petición de registro el subfijo api se puede hacer en routes en el archivo que se quiere hacer el cambio en el router post por esta línea: 
