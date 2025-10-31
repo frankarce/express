@@ -1150,7 +1150,7 @@ y ahora si podemos hacer peticiones a login o register cumpliendo o no con las r
 Para mostrar solo lo que queremos mostrar en el fron end 
 
 Tambien crearemos un esquema de validación para las tareas le pondremos task.schema.js
-
+```javascript
 import {z} from 'zod';
 
 export const createTaskSchema = z.object({
@@ -1158,4 +1158,4 @@ export const createTaskSchema = z.object({
     description : z.string({required_error: 'La descripción es obligatoria'}).optional(),
     date : z.string({ required_error: 'La fecha es obligatoria' }).datetime().optional()
 });
-
+```
