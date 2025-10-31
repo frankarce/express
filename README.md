@@ -30,7 +30,7 @@ ELABORADO ENERO- JUNIO DEL 2025
 
 
 
-INTRODUCCION
+#INTRODUCCION
 Express.js es un framework web para Node.js que se utiliza para crear aplicaciones web y APIs. Es el framework web más popular de Node.js. 
 Características de Express.js 
 Es un framework de código abierto y gratuito
@@ -70,26 +70,34 @@ para lanzarlo se usa el comando:
 node src/app.js
 ```
 Pero hasta aquí ocurre un error ya que por defecto js no reconoce los imports, para reparar este problema hay que ir al archivo ‘package.json’ y agregar el atributo “type”:”module”, para que reconozca los imports.
-Si se corre de nuevo `node src/app.js` ya tendríamos response mal pero ya respondería el servicio.
-Seria por localhost:3000
-Y eso es porque aún no hay contenido para mostrar de la página, para tener se crea la carpeta routes dentro de src para poder especificar rutas de archivos.
-También se creará la carpeta controllers para almacenar funciones de nuestra página como el gestor del login y otras.
-Adicionalmente hay que crear una carpeta llamada models para guardar los modelos de datos. La carpeta middlewares se necesita para gestionar contenido a nivel usuario (permisos). Necesitamos la carpeta para validaciones de errores que llamaremos schemas. También necesitamos la carpeta libs tendrá código reutilizable.
+Si se corre de nuevo `node src/app.js` ya tendríamos response, mal pero ya respondería el servicio.
+
+Y eso es porque aún no hay contenido para mostrar de la página, para tener se crea la carpeta `routes` dentro de `src` para poder especificar rutas de archivos.
+También se creará la carpeta `controllers` para almacenar funciones de nuestra página como el gestor del login y otras.
+Adicionalmente hay que crear una carpeta llamada models para guardar los modelos de datos. La carpeta `middlewares` se necesita para gestionar contenido a nivel usuario (permisos). Necesitamos la carpeta para validaciones de errores que llamaremos `schemas`. También necesitamos la carpeta `libs` tendrá código reutilizable.
 Y por último unos archivos adicionales también dentro de src:
+```
 Db.js (gestión de la conexión de la base de datos).
 Config.js (se genera para reutilizar configuraciones como configuraciones globales).
 Index.js(a donde se dirigirán inicialmente los contenidos).
+```
 Una vez creado todo el conjunto de carpetas y archivos proseguimos con algunas configuraciones. 
 Los primero es ir a app.js y cortar las ultimas 2 lineas y llevaras a index.js, una vez eliminadas sustituir esas 2 lineas:
+```javascript
 app.listen(3000)
 console.log('Server on port', 3000)
+```
 
-(con la siguiente ‘express defautl app”; esto permitirá exportar la app a otros archivos, lo siguiente es ir a index.js y agregar la siguiente línea:
+(con la siguiente ‘express defautl app”; esto permitirá exportar la app a otros archivos, lo siguiente es ir a `index.js` y agregar la siguiente línea:
+```javascript 
 import app from './app.js'
+```
 
 quedando los archivos de la siguiente manera: 
 
-index.js
+`index.js`
+
+```javascript 
 import app from './app.js'
 
 app.listen(3000)
@@ -100,26 +108,31 @@ import express from 'express'
 const app = express()
 // se lanza con el puerto 3000 con:
 export default app;
+```
 
-se levanta el servicio ahora con node src/index.js y seguirá mandando el error cant get pero ya está creada la estructura, adicionalmente podemos instalar otra dependencia para que no tengamos que estar bajando y subiendo el servicio cada que hagamos algún cambio npm i nodemon, una vez instalado vamos al archivo package json y en el elemento “scripts” agregamos el elemento “dev” de la siguiente manera.
+Se levanta el servicio ahora con node `src/index.js`  y seguirá mandando el error cant get pero ya está creada la estructura, adicionalmente podemos instalar otra dependencia para que no tengamos que estar bajando y subiendo el servicio cada que hagamos algún cambio `npm i nodemon`, una vez instalado vamos al archivo package json y en el elemento “scripts” agregamos el elemento “dev” de la siguiente manera.
+```json
 "dev" : "nodemon src/index.js"
+```
 Una vez hecho esto solo iniciamos el server con la instrucción 
 
-npm run dev
+`npm run dev`
 
 Nos falta un logger para ver la actividad de peticiones y respuestas del servidor, para eso agregaremos el administrador de paquetes Morgan desde la terminal con la instrucción 
-npm i Morgan
+`npm i Morgan`
 una vez instalado hay que instanciarlo en el archivo app.js y quedaría asi:
+
+```javascript 
 import express from 'express'
 import morgan from 'morgan'
 
 const app = express();
 app.use(morgan('dev'));
 export default app;
+```
 
 
-
-BASE DE DATOS
+#BASE DE DATOS
 Hasta ese punto ya debemos tener instalado mongodb comunnity para continuar.
 
 Si ya esta necesitamos el paquete mongoose para poder conectarnos con mongodb, lo instalamos con la siguiente instrucción.
@@ -260,6 +273,7 @@ export default app;
  volvemos a mandar el post y ahora si en el consolé saldrá el json que mandamos.
  
 Para probar que podemos enviar en el body los 3 datos de usuarios que creamos en el modelo de datos de la carpeta models que son email usuario y password modificaremos el archivo que con la línea 2 cache los datos que vienen de la petición y los muestre por consola quedaría asi el archivo auth
+
 
 
 
